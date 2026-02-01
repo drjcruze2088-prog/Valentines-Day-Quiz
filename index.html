@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Valentine Quiz ❤️</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #ffe6eb;
+    overflow: hidden;
+}
+
+/* Floating hearts background */
+.hearts {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.heart {
+    position: absolute;
+    color: red;
+    animation: float 6s linear infinite;
+}
+
+@keyframes float {
+    0% { transform: translateY(100vh); opacity: 1; }
+    100% { transform: translateY(-10vh); opacity: 0; }
+}
+
+.quiz-box {
+    position: relative;
+    z-index: 2;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+}
+
+h2 {
+    color: #e6005c;
+}
+
+button {
+    width: 90%;
+    max-width: 300px;
+    margin: 8px;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 25px;
+    background: #ff4d79;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+button:hover {
+    background: #e6005c;
+}
+
+/* Shake for wrong answers */
+.shake {
+    animation: shake 0.3s;
+}
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    50% { transform: translateX(6px); }
+    75% { transform: translateX(-6px); }
+    100% { transform: translateX(0); }
+}
+
+/* Runaway NO button */
+.runaway {
+    position: absolute;
+}
+
+#result {
+    margin-top: 10px;
+    font-weight: bold;
+    color: #e6005c;
+}
+
+#score {
+    margin-top: 5px;
+    font-size: 14px;
+}
+
+.final-screen {
+    height: 100vh;
+    background: #ffe6eb;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-size: 28px;
+    color: #e6005c;
+}
+</style>
+</head>
+
+<body>
+
+<div class="hearts" id="hearts"></div>
+
+<div class="quiz-box" id="quiz">
+    <h2 id="question"></h2>
+    <div id="options"></div>
+    <div id="result"></div>
+    <div id="score"></div>
+</div>
+
+<script>
+const questions = [
+    {
+        question: "When we 1st meet in person?",
+        options: ["May 26", "June 1st", "June 13", "June 19"],
+        answer: "June 19"
+    },
+    {
+        question: "What did you give me 1st punishment?",
+        options: ["Buy me ice cream", "Buy me lunch", "Do 50 Situp", "Sing me a song"],
+        answer: "Do 50 Situp"
+    },
+    {
+        question: "What did i give you 1st thing after we meet?",
+        options: ["Milkshake", "Chocolate", "Kinder Joy", "Fresh Juice"],
+        answer: "Chocolate"
+    },
+    {
+        question: "When we went to 1st short trip?",
+        options: ["July 15", "Sep 15", "Sep 25", "Oct 08"],
+        answer: "Sep 25"
+    },
+    {
+        question: "Will you be my valentine?",
+        options: ["Yes", "No"],
+        answer: "Yes",
+        runaway: true
+    }
+];
+
+let current = 0;
+let score = 0;
+
+function loadQuestion() {
+    document.getElementById("result").innerHTML = "";
+    document.getElementById("score").innerHTML = `Score: ${score} ❤️`;
+
+    const q = questions[current];
+    document.getElementById("question").innerText = q.question;
+
+    const options = document.getElementById("options");
+    options.innerHTML = "";
+    options.style.position = "relative";
+
+    q.options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.innerText = opt;
+
+        // Runaway NO button logic
+        if (q.runaway && opt === "No") {
+            btn.classList.add("runaway");
+            btn.onmouseover = () => moveButton(btn);
+        } else {
+            btn.onclick = () => checkAnswer(opt, btn);
+        }
+
+        options.appendChild(btn);
+    });
+}
+
+function moveButton(btn) {
+    const x = Math.random() * 200 - 100;
+    const y = Math.random() * 200 - 100;
+    btn.style.transform = `translate(${x}px, ${y}px)`;
+}
+
+function checkAnswer(selected, btn) {
+    if (selected === questions[current].answer) {
+        score++;
+        current++;
+        if (current < questions.length) {
+            loadQuestion();
+        } else {
+            showFinal();
+        }
+    } else {
+        btn.classList.add("shake");
+        document.getElementById("result").innerHTML =
+            "😜 Nice try… but fate says NO!";
+        setTimeout(() => btn.classList.remove("shake"), 300);
+    }
+}
+
+function showFinal() {
+    document.body.innerHTML = `
+        <div class="final-screen">
+            <div>Yayyy! You're My Valentine! ❤️</div>
+            <div style="font-size:18px;margin-top:10px;">
+                Final Score: ${score}/${questions.length}
+            </div>
+        </div>
+        <div class="hearts" id="hearts"></div>
+    `;
+    startHearts(true);
+}
+
+function startHearts(big = false) {
+    const hearts = document.getElementById("hearts");
+    setInterval(() => {
+        const heart = document.createElement("div");
+        heart.className = "heart";
+        heart.innerText = "❤️";
+        heart.style.left = Math.random() * 100 + "vw";
+        heart.style.fontSize = (big ? 32 : 20) + "px";
+        hearts.appendChild(heart);
+        setTimeout(() => heart.remove(), 6000);
+    }, big ? 120 : 500);
+}
+
+startHearts();
+loadQuestion();
+</script>
+
+</body>
+</html>
